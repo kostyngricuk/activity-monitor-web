@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase, SeatRow } from '@/lib/supabase';
 import { Seat } from './seats';
 
@@ -71,5 +71,9 @@ export function useSeats() {
     };
   }, []);
 
-  return { seats, loading, connected };
+  const removeSeatLocal = useCallback((seatId: string) => {
+    setSeats((prev) => prev.filter((s) => s.id !== seatId));
+  }, []);
+
+  return { seats, loading, connected, removeSeatLocal };
 }

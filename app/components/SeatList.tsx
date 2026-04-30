@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { Seat, updateSeat } from '@/services/seats';
+import { Seat, deleteSeat, updateSeat } from '@/services/seats';
 import { useSeats } from '@/services/use-seats';
+import DeleteSeatModal from './DeleteSeatModal';
 import EditSeatModal from './EditSeatModal';
 import SeatListHeader from './SeatListHeader';
 import StatCard from './StatCard';
 import SeatRow from './SeatRow';
 
-type EditTarget = { seat: Seat };
+type SeatTarget = { seat: Seat };
 
 export default function SeatList() {
-  const { seats, loading, connected } = useSeats();
-  const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
+  const { seats, loading, connected, removeSeatLocal } = useSeats();
+  const [editTarget, setEditTarget] = useState<SeatTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<SeatTarget | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const copySeatId = async (seatId: string) => {
@@ -36,6 +38,15 @@ export default function SeatList() {
     const err = await updateSeat(editTarget.seat.id, currentPassword, newTitle);
     if (err) return err;
     setEditTarget(null);
+    return null;
+  };
+
+  const handleDelete = async (currentPassword: string): Promise<string | null> => {
+    if (!deleteTarget) return 'No seat selected';
+    const err = await deleteSeat(deleteTarget.seat.id, currentPassword);
+    if (err) return err;
+    removeSeatLocal(deleteTarget.seat.id);
+    setDeleteTarget(null);
     return null;
   };
 
@@ -73,6 +84,7 @@ export default function SeatList() {
             copiedId={copiedId}
             onCopyId={copySeatId}
             onEdit={(s) => setEditTarget({ seat: s })}
+            onDelete={(s) => setDeleteTarget({ seat: s })}
           />
         ))}
       </div>
@@ -82,6 +94,14 @@ export default function SeatList() {
           seatTitle={editTarget.seat.title}
           onClose={() => setEditTarget(null)}
           onSubmit={handleEdit}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteSeatModal
+          seatTitle={deleteTarget.seat.title}
+          onClose={() => setDeleteTarget(null)}
+          onSubmit={handleDelete}
         />
       )}
     </div>

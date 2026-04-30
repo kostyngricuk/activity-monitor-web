@@ -29,3 +29,16 @@ export async function updateSeat(
   if (!res.ok) return await parseError(res);
   return null;
 }
+
+export async function deleteSeat(
+  seatId: string,
+  password: string
+): Promise<string | null> {
+  const res = await fetch('/api/seats', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ seatId, password }),
+  });
+  if (!res.ok) return await parseError(res);
+  return null;
+}

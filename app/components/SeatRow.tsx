@@ -1,7 +1,7 @@
 'use client';
 
 import { Seat } from '@/services/seats';
-import { PenIcon } from './icons';
+import { PenIcon, TrashIcon } from './icons';
 
 function shortId(id: string): string {
   const stripped = id.startsWith('seat-') ? id.slice(5) : id;
@@ -14,9 +14,10 @@ type Props = {
   copiedId: string | null;
   onCopyId: (id: string) => void;
   onEdit: (seat: Seat) => void;
+  onDelete: (seat: Seat) => void;
 };
 
-export default function SeatRow({ seat, copiedId, onCopyId, onEdit }: Props) {
+export default function SeatRow({ seat, copiedId, onCopyId, onEdit, onDelete }: Props) {
   const sessionCount = seat.session_count ?? 0;
   const isBusy = sessionCount > 0;
 
@@ -78,6 +79,14 @@ export default function SeatRow({ seat, copiedId, onCopyId, onEdit }: Props) {
           className="inline-flex h-8 w-8 items-center justify-center text-amber-500 transition hover:text-amber-600"
         >
           <PenIcon className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onDelete(seat)}
+          title="Remove seat"
+          aria-label="Remove seat"
+          className="inline-flex h-8 w-8 items-center justify-center text-red-500 transition hover:text-red-600"
+        >
+          <TrashIcon className="h-4 w-4" />
         </button>
       </div>
     </div>
