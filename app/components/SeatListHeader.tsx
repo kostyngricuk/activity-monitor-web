@@ -9,7 +9,7 @@ export default function SeatListHeader({ connected }: Props) {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Account Seats
+          Claude Code Activity Monitor
         </h1>
         <div className="flex items-center gap-2">
           <span

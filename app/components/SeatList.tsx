@@ -59,7 +59,7 @@ export default function SeatList() {
       <SeatListHeader connected={connected} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <StatCard label="Total Seats" value={totalCount} accent="blue" />
+        <StatCard label="Total" value={totalCount} accent="blue" />
         <StatCard label="Active Sessions" value={totalSessions} accent="emerald" />
         <StatCard label="Disabled" value={totalCount - busyCount} accent="slate" />
       </div>

@@ -48,7 +48,7 @@ function SessionBar({ session, now }: { session: SeatSession; now: number }) {
       <div className="flex items-center justify-end text-xs">
         <span className="text-slate-500">
           {formatDuration(elapsed)} · {pct.toFixed(0)}%
-          {totalTokens > 0 ? ` · ${formatTokens(totalTokens)} tok` : ''}
+          {totalTokens > 0 ? ` · ${formatTokens(totalTokens)}` : ''}
         </span>
       </div>
       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
