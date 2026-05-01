@@ -23,8 +23,7 @@ export default function SeatListHeader({ connected }: Props) {
         </div>
       </div>
       <p className="text-sm text-slate-500">
-        Click a seat to start or end a session. The counter shows active Claude
-        Code sessions in real time.
+        The monitor shows all active Claude Code sessions
       </p>
     </div>
   );

@@ -12,4 +12,16 @@ export type SeatRow = {
   updated_at: string;
 };
 
+export type SeatSessionRow = {
+  id: string;
+  seat_id: string;
+  started_at: string;
+  ended_at: string | null;
+  last_active_at: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+};
+
 export const supabase = createClient(supabaseUrl, supabaseKey);

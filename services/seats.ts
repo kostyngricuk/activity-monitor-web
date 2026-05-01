@@ -1,10 +1,23 @@
 import { SeatStatus } from '@/lib/supabase';
 
+export type SeatSession = {
+  id: string;
+  seatId: string;
+  startedAt: string;
+  endedAt: string | null;
+  lastActiveAt: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
+};
+
 export type Seat = {
   id: string;
   title: string;
   status: SeatStatus;
   session_count: number;
+  activeSessions: SeatSession[];
 };
 
 async function parseError(res: Response): Promise<string> {

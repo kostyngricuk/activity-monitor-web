@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import {
+  supabaseAdmin as supabase,
+  errorToResponse,
+  readJsonBody,
+  UUID_V4_RE,
+} from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
-
-type RpcError = { code?: string; message: string };
 
 type SeatRpcRow = {
   seat_id?: string;
@@ -28,32 +26,6 @@ function normalizeRow(data: unknown) {
   };
 }
 
-function errorToResponse(error: RpcError) {
-  if (error.code === '28P01') {
-    return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
-  }
-  if (error.code === 'P0002') {
-    return NextResponse.json({ error: 'Seat not found' }, { status: 404 });
-  }
-  if (error.code === '23505') {
-    return NextResponse.json({ error: 'Seat with this title already exists' }, { status: 409 });
-  }
-  if (error.code === '22023') {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
-  }
-  return NextResponse.json({ error: error.message }, { status: 500 });
-}
-
-async function readBody(req: Request) {
-  try {
-    const text = await req.text();
-    if (!text) return {};
-    return JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
 export async function GET() {
   const { data, error } = await supabase
     .from('seats')
@@ -66,10 +38,8 @@ export async function GET() {
   return NextResponse.json(data ?? []);
 }
 
-const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 export async function POST(req: Request) {
-  const body = await readBody(req);
+  const body = await readJsonBody(req);
   if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
 
   const seatId = typeof body.seatId === 'string' ? body.seatId.trim().toLowerCase() : '';
@@ -95,12 +65,14 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const body = await readBody(req);
+  const body = await readJsonBody(req);
   if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
 
   const seatId = typeof body.seatId === 'string' ? body.seatId : '';
   const password = typeof body.password === 'string' ? body.password : '';
   const action = typeof body.action === 'string' ? body.action : '';
+  const sessionId =
+    typeof body.sessionId === 'string' ? body.sessionId.trim().toLowerCase() : '';
 
   if (!seatId) return NextResponse.json({ error: 'seatId is required' }, { status: 400 });
   if (!password) return NextResponse.json({ error: 'password is required' }, { status: 400 });
@@ -110,11 +82,15 @@ export async function PATCH(req: Request) {
       { status: 400 }
     );
   }
+  if (sessionId && !UUID_V4_RE.test(sessionId)) {
+    return NextResponse.json({ error: 'sessionId must be a UUID' }, { status: 400 });
+  }
 
   const { data, error } = await supabase.rpc('change_seat_session', {
     p_id: seatId,
     p_password: password,
     p_action: action,
+    p_session_id: sessionId || null,
   });
 
   if (error) return errorToResponse(error);
@@ -123,7 +99,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  const body = await readBody(req);
+  const body = await readJsonBody(req);
   if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
 
   const seatId = typeof body.seatId === 'string' ? body.seatId : '';
@@ -151,7 +127,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const body = (await readBody(req)) ?? {};
+  const body = (await readJsonBody(req)) ?? {};
 
   const seatId =
     (typeof body.seatId === 'string' && body.seatId) ||
